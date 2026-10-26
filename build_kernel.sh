@@ -86,7 +86,7 @@ fi
 echo "==========================================="
 echo " [*] Initializing NoMount v2.2.0 Setup"
 echo "==========================================="
-curl -fsSL "https://raw.githubusercontent.com/maxsteeel/nomount/dev/kernel/setup.sh" | sh -s v2.2.0
+curl -fsSL "https://raw.githubusercontent.com/maxsteeel/nomount/v2.2.0/kernel/setup.sh" | sh -s v2.2.0
 echo "[+] NoMount v2.2.0 setup finished."
 
 # ==========================================
