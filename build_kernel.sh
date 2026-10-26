@@ -81,6 +81,15 @@ if [ "$ENABLE_KSU" -eq 1 ]; then
 fi
 
 # ==========================================
+# NoMount Setup (Linux 4.19 integration)
+# ==========================================
+echo "==========================================="
+echo " [*] Initializing NoMount v2.2.0 Setup"
+echo "==========================================="
+curl -fsSL "https://raw.githubusercontent.com/maxsteeel/nomount/dev/kernel/setup.sh" | sh -s v2.2.0
+echo "[+] NoMount v2.2.0 setup finished."
+
+# ==========================================
 # Baseband-guard Setup
 # ==========================================
 echo "==========================================="
@@ -204,7 +213,11 @@ build_target() {
     echo "[*] Injecting Baseband-guard configuration..."
     scripts/config --file "${OUT_DIR}/.config" -e BBG
 
-    # 2. KernelSU configurations
+    # 2. NoMount configuration (available with or without KernelSU)
+    echo "[*] Enabling NoMount..."
+    scripts/config --file "${OUT_DIR}/.config" -e NOMOUNT
+
+    # 3. KernelSU configurations
     if [ "$ENABLE_KSU" -eq 1 ]; then
         echo "[*] Injecting BakaSU & SUSFS configurations..."
         scripts/config --file "${OUT_DIR}/.config" \
