@@ -81,6 +81,26 @@ if [ "$ENABLE_KSU" -eq 1 ]; then
 fi
 
 # ==========================================
+# NoMount Setup (Linux 4.19 integration)
+# Resolve the latest stable GitHub Release at build time.
+# ==========================================
+echo "==========================================="
+echo " [*] Resolving latest stable NoMount release"
+echo "==========================================="
+NOMOUNT_VERSION="$(curl -fsSL --retry 3 --retry-delay 2 \
+    https://api.github.com/repos/maxsteeel/nomount/releases/latest \
+    | python3 -c 'import json,sys; print(json.load(sys.stdin)["tag_name"])')"
+if [ -z "$NOMOUNT_VERSION" ]; then
+    echo "[!] Failed to resolve the latest stable NoMount release."
+    exit 1
+fi
+echo "[*] Latest stable NoMount release: ${NOMOUNT_VERSION}"
+curl -fsSL --retry 3 --retry-delay 2 \
+    "https://raw.githubusercontent.com/maxsteeel/nomount/${NOMOUNT_VERSION}/kernel/setup.sh" \
+    | sh -s "${NOMOUNT_VERSION}"
+echo "[+] NoMount ${NOMOUNT_VERSION} setup finished."
+
+# ==========================================
 # Baseband-guard Setup
 # ==========================================
 echo "==========================================="
@@ -204,7 +224,11 @@ build_target() {
     echo "[*] Injecting Baseband-guard configuration..."
     scripts/config --file "${OUT_DIR}/.config" -e BBG
 
-    # 2. KernelSU configurations
+    # 2. NoMount configuration (available with or without KernelSU)
+    echo "[*] Enabling NoMount..."
+    scripts/config --file "${OUT_DIR}/.config" -e NOMOUNT
+
+    # 3. KernelSU configurations
     if [ "$ENABLE_KSU" -eq 1 ]; then
         echo "[*] Injecting BakaSU & SUSFS configurations..."
         scripts/config --file "${OUT_DIR}/.config" \
