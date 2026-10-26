@@ -82,12 +82,24 @@ fi
 
 # ==========================================
 # NoMount Setup (Linux 4.19 integration)
+# Fetch the latest non-prerelease GitHub Release each build.
+# Fail the build if the API or setup script cannot be fetched.
 # ==========================================
 echo "==========================================="
-echo " [*] Initializing NoMount v2.2.0 Setup"
+echo " [*] Resolving latest stable NoMount release"
 echo "==========================================="
-curl -fsSL "https://raw.githubusercontent.com/maxsteeel/nomount/v2.2.0/kernel/setup.sh" | sh -s v2.2.0
-echo "[+] NoMount v2.2.0 setup finished."
+NOMOUNT_VERSION="$(curl -fsSL --retry 3 --retry-delay 2 \
+    https://api.github.com/repos/maxsteeel/nomount/releases/latest \
+    | python3 -c 'import json,sys; print(json.load(sys.stdin)["tag_name"])')"
+if [ -z "$NOMOUNT_VERSION" ]; then
+    echo "[!] Failed to resolve the latest stable NoMount release."
+    exit 1
+fi
+echo "[*] Latest stable NoMount release: ${NOMOUNT_VERSION}"
+curl -fsSL --retry 3 --retry-delay 2 \
+    "https://raw.githubusercontent.com/maxsteeel/nomount/${NOMOUNT_VERSION}/kernel/setup.sh" \
+    | sh -s "${NOMOUNT_VERSION}"
+echo "[+] NoMount ${NOMOUNT_VERSION} setup finished."
 
 # ==========================================
 # Baseband-guard Setup
@@ -115,7 +127,7 @@ git clone https://github.com/AstideLabs/AnyKernel3 -b kona --single-branch --dep
 echo "[+] AnyKernel3 cloned successfully."
 echo "[*] Adjusting AnyKernel3..."
 sed -i "s/^device\.name1=.*/device.name1=${DEVICE_NAME}/" anykernel/anykernel.sh
-echo "[*] AnyKernel3 adjusted successfully."
+echo "[+] AnyKernel3 adjusted successfully."
 echo "==========================================="
 
 # ==========================================
@@ -196,7 +208,7 @@ build_target() {
         sed -i 's/\/\/39 01 00 00 00 00 05 51 07 FF 00 00/39 01 00 00 00 00 05 51 07 FF 00 00/g' ${DTS_SOURCE}/dsi-panel-j1s-42-02-0a-dsc-cmd.dtsi || true
         sed -i 's/\/\/39 01 00 00 00 00 05 51 07 FF 00 00/39 01 00 00 00 00 05 51 07 FF 00 00/g' ${DTS_SOURCE}/dsi-panel-j1s-42-02-0a-mp-dsc-cmd.dtsi || true
         sed -i 's/\/\/39 01 00 00 00 00 05 51 07 FF 00 00/39 01 00 00 00 00 05 51 07 FF 00 00/g' ${DTS_SOURCE}/dsi-panel-j2-mp-42-02-0b-dsc-cmd.dtsi || true
-        sed -i 's/\/\/39 01 00 00 00 00 05 51 07 FF 00 00/39 01 00 00 00 00 05 51 07 FF 00 00/g' ${DTS_SOURCE}/dsi-panel-j2-p2-1-42-02-0b-dsc-cmd.dtsi || true
+        sed -i 's/\/\/39 01 00 00 00 00 05 51 07 FF 00 00/39 01 00 00 00 00 05 51 07 FF 00 00/g' ${DTS_SOURCE}/dsi-panel-j2-p2-1-38-0c-0a-dsc-cmd.dtsi || true
         sed -i 's/\/\/39 01 00 00 00 00 05 51 07 FF 00 00/39 01 00 00 00 00 05 51 07 FF 00 00/g' ${DTS_SOURCE}/dsi-panel-j2s-mp-42-02-0a-dsc-cmd.dtsi || true
         sed -i 's/\/\/39 01 00 00 01 00 03 51 03 FF/39 01 00 00 01 00 03 51 03 FF/g' ${DTS_SOURCE}/dsi-panel-j11-38-08-0a-fhd-cmd.dtsi || true
         sed -i 's/\/\/39 01 00 00 11 00 03 51 03 FF/39 01 00 00 11 00 03 51 03 FF/g' ${DTS_SOURCE}/dsi-panel-j2-p2-1-38-0c-0a-dsc-cmd.dtsi || true
