@@ -102,7 +102,7 @@ echo " [*] Initializing AnyKernel3 Workspace"
 echo "==========================================="
 rm -rf anykernel
 echo "[*] Cloning AnyKernel3..."
-git clone https://github.com/AstideLabs/AnyKernel3 -b master --single-branch --depth=1 anykernel
+git clone https://github.com/wdgu/AnyKernel3 -b master --single-branch --depth=1 anykernel
 echo "[+] AnyKernel3 cloned successfully."
 echo "==========================================="
 
